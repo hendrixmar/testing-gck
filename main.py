@@ -21,6 +21,7 @@ url = 'youtube_extract'
 LANGUAGUE_CODES = {
     "english" : "en"
 }
+#gcloud builds submit --tag gcr.io/speech-analysis-256223/processing-testing .
 
 
 

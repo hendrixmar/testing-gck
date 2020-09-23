@@ -13,5 +13,3 @@ RUN pip install --upgrade ./pyorient
 
 # Run python program
 CMD python ./app.py
-
-youtube_dl
