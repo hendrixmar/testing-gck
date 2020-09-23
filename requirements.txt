@@ -1,0 +1,3 @@
+minio
+confluent_kafka
+pyorient

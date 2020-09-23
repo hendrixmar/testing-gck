@@ -1,0 +1,8 @@
+{
+    "host":"localhost",
+    "user":"root",
+    "password":"Tyrant-002",
+    "port":2424,
+    "db2":"test",
+    "db":"demodb"
+}

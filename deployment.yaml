@@ -1,0 +1,20 @@
+# This file configures the hello-world app which serves public web traffic.
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: processing-audio-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: processing-audio-testing
+  template:
+    metadata:
+      labels:
+        app: processing-audio-testing
+    spec:
+      containers:
+      - name: process-test-audio
+        # Replace $GCLOUD_PROJECT with your project ID
+        image: gcr.io/speech-analysis-256223/processing-audio-test
+        # This app listens on port 8080 for web traffic by default.
