@@ -1,18 +1,11 @@
-from confluent_kafka import Consumer
+import logging
+import sys
+from kafka import KafkaConsumer
 import youtube_dl
 from minio import Minio
 from config.config import minio_config
 import glob
 
-print("Funcionando")
-c = Consumer({
-    'bootstrap.servers': '34.83.10.221:9094',
-    'group.id': 'test',
-    'auto.offset.reset': 'earliest',
-    'debug': "consumer, broker, topic",
-    "security.protocol": "SSL",
-    "ssl.ca.location": 'ca.crt'
-})
 
 LANGUAGUE_CODES = {
     "english" : "en"
@@ -35,32 +28,36 @@ def get_audioinfo_from_metadata(url : str):
     audioinfo["pubDate"] = meta.get("upload_date")
     return audioinfo
 
-c.subscribe(['test'])
+
 storage = Minio(minio_config['host'],
                          access_key=minio_config['access_key'],
                          secret_key=minio_config['secret_key'],
                          secure=False)
 
 
-while True:
-    try:
-        msg = c.poll(1000)
 
-        if msg is None:
-            # print("Continue")
-            continue
-        if msg.error():
-            # print("Consumer error: {}".format(msg.error()))
-            continue
-        else:
-            record_key = msg.key()
-            record_value = msg.value()
-            print(f"{msg.offset()}, Consumed record with key {record_key} and value {record_value}")
-            get_audioinfo_from_metadata(msg.value())
-            path = glob.glob('*.mp4')[0]
-            storage.fput_object("test-datyra", f"youtube/{path}", f"./{path}")
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
 
-    except:
-        print("Exception !!!")
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
-c.close()
+#Using Service Name of service(kafka-cluster-kafka-bootstrap.<namespace>.svc:9092)
+kafka_consumer = KafkaConsumer(
+    'test',
+    bootstrap_servers='kafka-cluster-kafka-bootstrap.default.svc:9092',
+    group_id=None,
+    auto_offset_reset='latest',
+    api_version=(0,10)
+)
+
+kafka_consumer.poll(timeout_ms=1000)
+for msg in kafka_consumer:
+    logging.info("====>>>>>: "+str(msg))
+    temp = str(msg)
+    metadatos = get_audioinfo_from_metadata(temp)
+    path = glob.glob('*.mp4')[0]
+    storage.fput_object("test-datyra", f"youtube/{path}", f"./{path}")
