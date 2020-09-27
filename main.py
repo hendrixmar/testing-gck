@@ -13,12 +13,11 @@ from xmldiff import main, formatting
 
 key = "c94cab88-2c7a-4ec3-a779-c3509b6b6856"
 file_path = "1. Summer Lady.mp3"
-metadata  = {"name": "summer emotions", "author": "james bond"}
+metadata  = {"name": "Dom dima dom", "author": "mick jaggermeister"}
 
-temp = Media(_uuid="d2695e3800d611ebb711e454e83239f7")
-#temp.update_file('02. Sea Line Rie.mp3')
-meta = temp.get_metadata()
-meta.update({"name": "bruhhhhhhhhhhhh"})
+temp = S3MediaObject(_uuid="ede1c93e00e311eb8efbe454e83239f7")
+temp.update_metadata({"street": "of dreams"})
+print(temp.get_metadata())
 temp.persist_data()
 
 #temp = Media(_uuid="bfeb5efe00d411eba4d8e454e83239f7")
