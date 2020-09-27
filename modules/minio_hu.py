@@ -1,7 +1,7 @@
 from minio import Minio
 from config.config import minio_config
 import logging
-import uuid
+
 from minio.error import (ResponseError, BucketAlreadyOwnedByYou,
                          BucketAlreadyExists)
 
@@ -15,7 +15,7 @@ class MinioHU(Minio):
                          secret_key=minio_config['secret_key'],
                          secure=False)
 
-        self._bucket_name = minio_config['bucket_name']
+        self.__bucket_name = minio_config['bucket_name']
 
 
     def store_file(self, minio_file_path : str, local_file_path : str):

@@ -1,35 +1,39 @@
 
 from modules.store_hu import StoreHu
-import uuid
+import uuid as uuid_generator
+import os
+
+get_extension = lambda path : os.path.splitext(path)[1]
 
 class S3MediaObject(StoreHu):
 
 
-    def __init__(self, metadata : dict = {}, local_file_path : str = '', uuid_media : str = '',  uuid : str = None):
+    def __init__(self, metadata : dict = {}, local_file_path : str = '', uuid_media : str = '',  _uuid : str = None):
 
         super().__init__('Media')
-        if uuid == None:
+        if _uuid == None:
             if metadata == {} or local_file_path == '' or uuid_media == '':
                 raise Exception("You must instance the class with the metadata, local file path, and uuid media")
 
             self.metadata = metadata.copy()
-            self.uuid = uuid.uuid1().hex
+            self.__uuid = uuid_generator.uuid1().hex
             self.uuid_media = uuid_media
             self.local_file_path = local_file_path
-            self.minio_file_path = f'{uuid_media}/{self.uuid}'
+            self.minio_file_path = f'{uuid_media}/{self.__uuid}{get_extension(local_file_path)}'
 
 
         else:
             """
                 retrieve data
             """
-            self.metadata, self._rid = self.retrieve_document(uuid)
+            self.metadata, self._rid = self.retrieve_document(_uuid)
             self.local_file_path = self.metadata['local_file_path']
             self.uuid = self.metadata['uuid']
             self.uuid_media = self.metadata['uuid_media']
             self.minio_file_path = self.metadata['minio_file_path']
-            self.obtain_file()
+            self.obtain_file(self.minio_file_path ,self.local_file_path)
             self.downloaded = True
+            self.__update = False
 
 
 
@@ -83,60 +87,87 @@ class S3MediaObject(StoreHu):
 
 class Media(StoreHu):
 
+    def __init__(self, metadata: dict = {}, local_file_path: str = '', _uuid = None):
 
-    def __init__(self, metadata : dict = {}, local_file_path : str = '', folder_name : str = '',  uuid : str = None):
+        super().__init__('Media')
+        if _uuid == None:
+            if metadata == {} or local_file_path == '' :
+                raise Exception("You must instance the class with the metadata, local file path, and uuid media")
 
-        super().__init__(self, 'Media')
-        if uuid == None:
-
-            self.metadata = metadata
-            file_name = uuid.uuid1().hex
-            self.file_name = f'{folder_name}/{file_name}'
-            self.create_file(self.file_name, local_file_path)
-            temp = self.insert_document(metadata)
-            self._key = temp
-
+            self.__metadata = metadata.copy()
+            self.__uuid = uuid_generator.uuid1().hex
+            self.__local_file_path = local_file_path
+            self.__minio_file_path = f'{self.__uuid}/{self.__uuid}{get_extension(local_file_path)}'
+            self.__s3media_set = []
+            self.__uuid_s3media = []
+            self.__update = True
         else:
             """
-            retrieve data
+                retrieve data
             """
-            pass
+            self.__metadata, self._rid = self.retrieve_document(_uuid)
+            self.__local_file_path = self.__metadata['local_file_path']
+            self.__uuid = self.__metadata['uuid']
+            self.__minio_file_path = self.__metadata['minio_file_path']
+            self.obtain_file(self.__minio_file_path ,self.__local_file_path)
+            self.__downloaded = True
+            self.__update = False
+            self.__uuid_s3media = self.__metadata["uuid_s3media_set"]
 
+    def add_s3media(self, s3media_object : S3MediaObject):
 
-    def update_metadata(self, metadata : dict):
-        pass
+        self.__s3media_set.append(s3media_object)
+        self.__uuid_s3media.append(s3media_object.uuid)
 
-    def update_file(self, local_file_path : str ):
-
-        self.update_file(self.file_name, local_file_path)
 
     def update_metadata(self, metadata: dict):
-        pass
+        """
+
+        :param metadata:
+        :return:
+        """
+        self.__metadata = metadata
 
     def update_file(self, local_file_path: str):
-        self.update_file(self.file_name, local_file_path)
+        self.__update = True
+        self.__local_file_path = local_file_path
 
-    def get_metadata(self):
+
+    def get_metadata(self) -> dict:
         """
 
         :return: self.metadata : dict
         """
-        pass
+        return self.__metadata
 
-    def get_file(self):
+    def get_file(self) -> str:
         """
 
         :return: self.local_file_path : str
         """
-        pass
+        if self.__downloaded:
+            self.__local_file_path
+        else:
+            raise Exception("File not downloaded")
 
     def persist_data(self):
-        pass
 
-        #self.create_file(self.file_name, local_file_path)
-        #temp = self.insert_document(self.metadata)
+        self.__metadata.update({
+            "uuid": self.__uuid,
+            "minio_file_path": self.__minio_file_path,
+            "uuid_s3media_set" : self.__uuid_s3media,
+            "local_file_path" : self.__local_file_path
+        })
 
+        if self.__update:
+            self.create_file(self.__minio_file_path, self.__local_file_path)
 
+        if self.__downloaded:
+            temp = self.update_document(self.__uuid, self.__metadata)
+        else:
+            temp = self.insert_document(self.__metadata)
+
+        return temp
 
 
 

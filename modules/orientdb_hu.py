@@ -58,7 +58,7 @@ class OrientdbHU(OrientDB):
             Result of updating record on database
         """
 
-        query = f'UPDATE {self.__class_name} MERGE {json} WHERE UUID == "{uuid}"'
+        query = f'UPDATE {self.__class_name} MERGE {json} WHERE uuid == "{uuid}"'
 
         return self.command(query)
 
@@ -94,7 +94,7 @@ class OrientdbHU(OrientDB):
         Returns:
             Result of query of OrienDB
         """
-        query = f'SELECT FROM {self.__class_name} WHERE UUID == "{uuid}"'
+        query = f'SELECT FROM {self.__class_name} WHERE uuid == "{uuid}"'
 
         return self.command(query)
 

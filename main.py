@@ -5,20 +5,33 @@ from modules.store_hu import StoreHu
 from minio import Minio
 import pytube
 import youtube_dl
-from modules.storage_classes import S3MediaObject
+from modules.storage_classes import S3MediaObject, Media
 
 from lxml import etree
 from xmldiff import main, formatting
 
 
 key = "c94cab88-2c7a-4ec3-a779-c3509b6b6856"
+file_path = "1. Summer Lady.mp3"
+metadata  = {"name": "summer emotions", "author": "james bond"}
+
+temp = Media(_uuid="d2695e3800d611ebb711e454e83239f7")
+#temp.update_file('02. Sea Line Rie.mp3')
+meta = temp.get_metadata()
+meta.update({"name": "bruhhhhhhhhhhhh"})
+temp.persist_data()
+
+#temp = Media(_uuid="bfeb5efe00d411eba4d8e454e83239f7")
+
+#temp.persist_data()
 #example = StoreHu('Media')
-S3MediaObject()
+#Media()
+#S3MediaObject()
 #a = example.retrieve_document(key)
 
 
 
-exit()
+"""
 
 
 import xml.etree.ElementTree as ET
@@ -44,3 +57,5 @@ for elem_a, elem_b in zip(tree_a.iter(), tree_b.iter()):
         print("value not calculated")
 
     print("-"*40,"\n\n")
+
+"""
