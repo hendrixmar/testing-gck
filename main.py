@@ -1,54 +1,46 @@
 from config.config import minio_config
 from modules.orientdb_hu import OrientdbHU
 from modules.minio_hu import MinioHU
+from modules.store_hu import StoreHu
 from minio import Minio
-#example = MinioHU()
 import pytube
 import youtube_dl
+from modules.storage_classes import S3MediaObject
 
-#example.store_file('putos/xdxdxd', 'requirements.txt')
+from lxml import etree
+from xmldiff import main, formatting
 
-"""
-example = Minio(minio_config['host'],
-                         access_key=minio_config['access_key'],
-                         secret_key=minio_config['secret_key'],
-                         secure=False)
 
-objects = example.list_objects('test-datyra')
-"""
-
-url = 'youtube_extract'
-LANGUAGUE_CODES = {
-    "english" : "en"
-}
-#gcloud builds submit --tag gcr.io/speech-analysis-256223/processing-testing .
+key = "c94cab88-2c7a-4ec3-a779-c3509b6b6856"
+#example = StoreHu('Media')
+S3MediaObject()
+#a = example.retrieve_document(key)
 
 
 
-def get_audioinfo_from_metadata(url : str):
-    ydl_opts = {}
-    audioinfo = {}
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        meta = ydl.extract_info(url)
-    audioinfo["title"] = meta.get("title")
-    audioinfo["language"] = LANGUAGUE_CODES["english"]
-    audioinfo["website"] = meta.get("webpage_url")
-    audioinfo["author"] = meta.get("creator")
-    audioinfo["episodTitle"] = meta.get("episode")
-    audioinfo["audioUrl"] = url
-    audioinfo["audioLength"] = meta.get("duration")
-    audioinfo["pubDate"] = meta.get("upload_date")
-    audioinfo["destination"] = meta.get("destination")
-    return audioinfo
-
-#video.download()
-
-url = "https://www.youtube.com/watch?v=gjHCpR1FG5A"
-
-#metadata = get_audioinfo_from_metadata(url)
-import glob
-print(glob.glob('*.mp4'))
+exit()
 
 
+import xml.etree.ElementTree as ET
 
-#print(video.title)
+
+tree_a = ET.parse('a.xml')
+tree_b = ET.parse('b.xml')
+for elem_a, elem_b in zip(tree_a.iter(), tree_b.iter()):
+
+
+    if elem_a.tag != elem_b.tag:
+        print("-"* 10,"Not same tag name", "-"* 10)
+        print(elem_a.tag[26:], elem_b.tag[26:])
+    else:
+        print("-"* 10,elem_a.tag[26:], "-"* 10)
+
+    if elem_a.text and elem_b.text:
+        print("same length: ", len(elem_a.text) == len(elem_b.text))
+        print(len(elem_a.text) , len(elem_b.text))
+        print((elem_a.text), (elem_b.text))
+
+    elif elem_a.text or elem_b.text:
+        print("value not calculated")
+
+    print("-"*40,"\n\n")

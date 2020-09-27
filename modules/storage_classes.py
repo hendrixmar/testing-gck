@@ -7,14 +7,17 @@ class S3MediaObject(StoreHu):
 
     def __init__(self, metadata : dict = {}, local_file_path : str = '', uuid_media : str = '',  uuid : str = None):
 
-        super().__init__(self, 'Media')
+        super().__init__('Media')
         if uuid == None:
+            if metadata == {} or local_file_path == '' or uuid_media == '':
+                raise Exception("You must instance the class with the metadata, local file path, and uuid media")
 
-            self.metadata = metadata
+            self.metadata = metadata.copy()
             self.uuid = uuid.uuid1().hex
             self.uuid_media = uuid_media
             self.local_file_path = local_file_path
             self.minio_file_path = f'{uuid_media}/{self.uuid}'
+
 
         else:
             """
@@ -27,7 +30,7 @@ class S3MediaObject(StoreHu):
             self.minio_file_path = self.metadata['minio_file_path']
             self.obtain_file()
             self.downloaded = True
-            pass
+
 
 
     def update_metadata(self, metadata : dict):
