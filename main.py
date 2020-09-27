@@ -11,7 +11,9 @@ import os
 from lxml import etree
 from xmldiff import main, formatting
 
-
+temp = Media(_uuid="b4a59c02010211eba27ae454e83239f7")
+print(temp.get_metadata())
+exit()
 
 with open('slices.json') as json_file:
     data = json.load(json_file)
@@ -29,10 +31,10 @@ media_instance = Media(main, '1. Summer Lady.mp3')
 
 for metadata, file in zip(data, directory):
 
-
     media_instance.add_s3media(metadata, f"TK 87 SIAL/{file}")
 
 media_instance.persist_data()
+
 
 #temp = Media(_uuid="bfeb5efe00d411eba4d8e454e83239f7")
 

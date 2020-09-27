@@ -110,10 +110,11 @@ class Media(StoreHu):
             self.__uuid = uuid_generator.uuid1().hex
             self.__local_file_path = local_file_path
             self.__minio_file_path = f'{self.__uuid}/{self.__uuid}{get_extension(local_file_path)}'
-            self.__s3media_set = []
+
             self.__uuid_s3media = []
             self.__update = True
             self.__downloaded = False
+            self.__s3media_object_set = []
         else:
             """
                 retrieve data
@@ -125,12 +126,19 @@ class Media(StoreHu):
             self.obtain_file(self.__minio_file_path ,self.__local_file_path)
             self.__downloaded = True
             self.__update = False
-            self.__uuid_s3media = self.__metadata["uuid_s3media_set"]
+            self.__uuid_s3media = []
+            self.__s3media_object_set = []
+            for key in self.__metadata["s3media_set"]:
+                self.add_s3media(_uuid=key)
 
-    def add_s3media(self, metadata : dict = {}, local_file_path : str = ''):
 
-        s3media_object = S3MediaObject(metadata, local_file_path, self.__uuid)
-        self.__s3media_set.append(s3media_object)
+    def add_s3media(self, metadata : dict = {}, local_file_path : str = '', _uuid = None):
+        if _uuid:
+            s3media_object = S3MediaObject(_uuid=_uuid)
+        else:
+            s3media_object = S3MediaObject(metadata, local_file_path, self.__uuid)
+
+        self.__s3media_object_set.append(s3media_object)
 
 
 
@@ -185,7 +193,7 @@ class Media(StoreHu):
             temp = self.update_document(self.__uuid, self.__metadata)
         else:
             self.__metadata["s3media_set"] = []
-            for s3media_object in self.__s3media_set:
+            for s3media_object in self.__s3media_object_set:
                 temp = s3media_object.persist_data()
                 self.__metadata["s3media_set"].append(temp)
 
