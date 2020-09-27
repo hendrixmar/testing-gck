@@ -1,6 +1,6 @@
 from pyorient import OrientDB
 from config.config import pyorient_config
-
+import json
 # DELETE VERTEX Media
 class OrientdbHU(OrientDB):
 
@@ -33,7 +33,7 @@ class OrientdbHU(OrientDB):
         return self.command(query)
 
 
-    def update_rid(self, class_name, rid, json):
+    def update_rid(self,  rid, json):
         """ Method to Update Class Object
 
         Parameters:
@@ -47,6 +47,20 @@ class OrientdbHU(OrientDB):
 
         return self.command(query)
 
+    def update_uuid(self,  uuid, json):
+        """ Method to Update Class Object
+
+        Parameters:
+            class_name* (str): Class Name of OrientDB
+            rid* (str): Record Id
+            json (json): Object Json to save on Database
+        Returns:
+            Result of updating record on database
+        """
+
+        query = f'UPDATE {self.__class_name} MERGE {json} WHERE UUID == "{uuid}"'
+
+        return self.command(query)
 
     def delete_rid(self, class_name, rid):
         """ Method to delete record on OrientDB
@@ -61,7 +75,7 @@ class OrientdbHU(OrientDB):
 
         return self.command(query)
 
-    def select_uuids(self, class_name, uuids):
+    def select_uuids(self, uuids):
         """ Method to get records from rids list
         Parameters:
             rids(list): List of rids [#22:1, #22:3]
@@ -73,7 +87,18 @@ class OrientdbHU(OrientDB):
         return self.command(query)
 
 
-    def create(self,  json):
+    def select_uuid(self, uuid : str):
+        """ Method to get records from rids list
+        Parameters:
+            uuid(str):
+        Returns:
+            Result of query of OrienDB
+        """
+        query = f'SELECT FROM {self.__class_name} WHERE UUID == "{uuid}"'
+
+        return self.command(query)
+
+    def create(self,  json : str):
         """ Method to create Class Object
 
         Parameters:
@@ -82,6 +107,13 @@ class OrientdbHU(OrientDB):
         Returns:
             Result of creation on database
         """
+
         query = f'INSERT INTO {self.__class_name} CONTENT {json}'
 
         return self.command(query)
+
+    def select_rid(self, rid: str, table_name: str):
+
+        query = f"select * from {table_name}  where @rid={rid}"
+
+        return self.__db.command(query)

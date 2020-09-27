@@ -3,3 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/*
+a.xml
+b.xml
+main.py
+Dockerfile

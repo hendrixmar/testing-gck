@@ -1,3 +1,6 @@
 minio
-kafka
+kafka-python
 pyorient
+youtube_dl
+xmldiff
+lxml
