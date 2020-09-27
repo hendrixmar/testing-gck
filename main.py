@@ -6,19 +6,33 @@ from minio import Minio
 import pytube
 import youtube_dl
 from modules.storage_classes import S3MediaObject, Media
-
+import json
+import os
 from lxml import etree
 from xmldiff import main, formatting
 
 
-key = "c94cab88-2c7a-4ec3-a779-c3509b6b6856"
-file_path = "1. Summer Lady.mp3"
-metadata  = {"name": "Dom dima dom", "author": "mick jaggermeister"}
 
-temp = S3MediaObject(_uuid="ede1c93e00e311eb8efbe454e83239f7")
-temp.update_metadata({"street": "of dreams"})
-print(temp.get_metadata())
-temp.persist_data()
+with open('slices.json') as json_file:
+    data = json.load(json_file)
+
+with open('main.json') as json_file:
+    main = json.load(json_file)
+
+
+
+
+directory = os.listdir("TK 87 SIAL")
+
+media_instance = Media(main, '1. Summer Lady.mp3')
+
+
+for metadata, file in zip(data, directory):
+
+
+    media_instance.add_s3media(metadata, f"TK 87 SIAL/{file}")
+
+media_instance.persist_data()
 
 #temp = Media(_uuid="bfeb5efe00d411eba4d8e454e83239f7")
 
