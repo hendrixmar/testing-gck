@@ -5,14 +5,21 @@ from modules.store_hu import StoreHu
 from minio import Minio
 import pytube
 import youtube_dl
+import lorem
 from modules.storage_classes import S3MediaObject, Media
 import json
 import os
 from lxml import etree
 from xmldiff import main, formatting
 
-temp = Media(_uuid="b4a59c02010211eba27ae454e83239f7")
-print(temp.get_metadata())
+key = "4832e246018c11eb9dd8e454e83239f7"
+
+media_instance = Media(_uuid=key)
+for s3media_object in media_instance.iterate_s3media():
+
+
+    s3media_object.get_metadata()
+
 exit()
 
 with open('slices.json') as json_file:
@@ -32,6 +39,11 @@ media_instance = Media(main, '1. Summer Lady.mp3')
 for metadata, file in zip(data, directory):
 
     media_instance.add_s3media(metadata, f"TK 87 SIAL/{file}")
+
+for s3media_object in media_instance.iterate_s3media():
+
+    temp = lorem.text()
+    s3media_object.store_transcription(temp)
 
 media_instance.persist_data()
 

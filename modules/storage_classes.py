@@ -22,6 +22,7 @@ class S3MediaObject(StoreHu):
             self.__minio_file_path = f'{uuid_media}/{self.__uuid}{get_extension(local_file_path)}'
             self.__update = True
             self.__downloaded = False
+            self.__transcription =  None
 
 
         else:
@@ -37,6 +38,12 @@ class S3MediaObject(StoreHu):
             self.__downloaded = True
             self.__update = False
 
+            if self.__metadata["transcription"]:
+                self.obtain_file(f"{self.__uuid_media}/{self.__uuid}.txt", f"{self.__uuid}.txt")
+                self.__transcription = True
+            else:
+                self.__transcription = None
+
 
 
     def update_metadata(self, metadata : dict):
@@ -45,10 +52,9 @@ class S3MediaObject(StoreHu):
         :param metadata:
         :return:
         """
-
         if 'uuid' in metadata and (metadata['uuid'] != self.__metadata['uuid']  or \
                 metadata['uuid_media'] != self.__metadata['uuid_media']):
-            raise Exception("Not permitted change uuid or uuid media")
+            raise Exception("Invalid change (uuid and uuid media must not be modified)")
 
         self.__metadata.update(metadata)
 
@@ -69,13 +75,14 @@ class S3MediaObject(StoreHu):
 
         :return: self.local_file_path : str
         """
-
         if self.__downloaded:
             return self.__local_file_path
         else:
             raise Exception("File not downloaded")
 
+    def store_transcription(self, transcription : str):
 
+        self.__transcription =  transcription
 
     def persist_data(self):
 
@@ -87,6 +94,22 @@ class S3MediaObject(StoreHu):
         })
         if self.__update:
             self.create_file(self.__minio_file_path, self.__local_file_path)
+
+        if self.__transcription:
+
+            text_file = open(f"{self.__uuid}.txt", "w")
+            n = text_file.write(self.__transcription)
+            text_file.close()
+            self.__metadata.update({
+                "transcription": n
+            })
+
+            self.create_file(f"{self.__uuid_media}/{self.__uuid}.txt", f"{self.__uuid}.txt")
+        else:
+            self.__metadata.update({
+                "transcription": False
+            })
+
 
         if self.__downloaded:
             temp = self.update_document(self.__uuid, self.__metadata)
@@ -128,6 +151,8 @@ class Media(StoreHu):
             self.__update = False
             self.__uuid_s3media = []
             self.__s3media_object_set = []
+
+            # Instance all the s3mediaObject
             for key in self.__metadata["s3media_set"]:
                 self.add_s3media(_uuid=key)
 
@@ -140,6 +165,11 @@ class Media(StoreHu):
 
         self.__s3media_object_set.append(s3media_object)
 
+
+    def iterate_s3media(self):
+
+        for s3media_object in self.__s3media_object_set:
+            yield s3media_object
 
 
     def update_metadata(self, metadata: dict):
@@ -185,6 +215,7 @@ class Media(StoreHu):
             "local_file_path" : self.__local_file_path
         })
 
+        # flag to update the files on minio
         if self.__update:
 
             self.create_file(self.__minio_file_path, self.__local_file_path)
@@ -192,6 +223,12 @@ class Media(StoreHu):
         if self.__downloaded:
             temp = self.update_document(self.__uuid, self.__metadata)
         else:
+            """
+                Here it is iterating all the S3mediaObject that are related to this instance
+                of Media. So it can persist the changes to OrientDB and Minio. Also I add the UUID
+                of each S3MediaObject to the metadata. So it can fetch all the information when you
+                need to retrieve the Media with all the S3MediaObject
+            """
             self.__metadata["s3media_set"] = []
             for s3media_object in self.__s3media_object_set:
                 temp = s3media_object.persist_data()
