@@ -12,15 +12,18 @@ import os
 from lxml import etree
 from xmldiff import main, formatting
 
-key = "4832e246018c11eb9dd8e454e83239f7"
+key = "5af1a06e025f11ebadede454e83239f7"
 
 media_instance = Media(_uuid=key)
+print(media_instance.get_metadata())
 for s3media_object in media_instance.iterate_s3media():
 
 
-    s3media_object.get_metadata()
+    print(s3media_object.get_metadata())
+    print(s3media_object.get_transcription())
 
 exit()
+
 
 with open('slices.json') as json_file:
     data = json.load(json_file)
@@ -48,13 +51,7 @@ for s3media_object in media_instance.iterate_s3media():
 media_instance.persist_data()
 
 
-#temp = Media(_uuid="bfeb5efe00d411eba4d8e454e83239f7")
 
-#temp.persist_data()
-#example = StoreHu('Media')
-#Media()
-#S3MediaObject()
-#a = example.retrieve_document(key)
 
 
 

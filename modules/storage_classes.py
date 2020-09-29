@@ -34,13 +34,19 @@ class S3MediaObject(StoreHu):
             self.__uuid = self.__metadata['uuid']
             self.__uuid_media = self.__metadata['uuid_media']
             self.__minio_file_path = self.__metadata['minio_file_path']
+
+            # Audio file
             self.obtain_file(self.__minio_file_path ,self.__local_file_path)
             self.__downloaded = True
             self.__update = False
 
+            # Transcription file
             if self.__metadata["transcription"]:
                 self.obtain_file(f"{self.__uuid_media}/{self.__uuid}.txt", f"{self.__uuid}.txt")
-                self.__transcription = True
+                with open(f"{self.__uuid}.txt", "r") as text_file:
+                    self.__transcription = text_file.read()
+
+
             else:
                 self.__transcription = None
 
@@ -70,6 +76,10 @@ class S3MediaObject(StoreHu):
         """
         return self.__metadata
 
+    def get_transcription(self):
+        return self.__transcription
+
+
     def get_file(self) -> str:
         """
 
@@ -97,8 +107,9 @@ class S3MediaObject(StoreHu):
 
         if self.__transcription:
 
-            text_file = open(f"{self.__uuid}.txt", "w")
-            n = text_file.write(self.__transcription)
+            with open(f"{self.__uuid}.txt", "w") as text_file:
+                n = text_file.write(self.__transcription)
+
             text_file.close()
             self.__metadata.update({
                 "transcription": n
@@ -117,7 +128,6 @@ class S3MediaObject(StoreHu):
             temp = self.insert_document(self.__metadata)
 
         return self.__uuid
-
 
 
 class Media(StoreHu):
